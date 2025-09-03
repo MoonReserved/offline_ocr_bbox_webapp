@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offline OCR with Box Select</title>
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' blob: data:;
+                 style-src 'self' 'unsafe-inline';
+                 script-src 'self' 'wasm-unsafe-eval';
+                 worker-src 'self' blob:;
+                 connect-src 'self';">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin: 16px; }
+    #controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 8px; }
+    .head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #555; }
+    .canvas-wrap { position: relative; width: 100%; overflow: hidden; }
+    canvas { width: 100%; height: auto; display: block; border-radius: 4px; }
+    .badge { font-size: 12px; padding: 2px 6px; background: #eee; border-radius: 12px; }
+    .legend { font-size: 12px; color: #666; }
+    #export { width: 100%; height: 160px; }
+    button { padding: 8px 12px; }
+  </style>
+</head>
+<body>
+  <h1>Offline OCR with Box Select</h1>
+  <div id="controls">
+    <input type="file" id="files" accept="image/*" multiple />
+    <select id="lang">
+      <option value="eng">English</option>
+      <option value="chi_sim">Chinese (Simplified)</option>
+      <option value="chi_tra" selected>Chinese (Traditional)</option>
+    </select>
+    <label><input type="checkbox" id="autostart"/> Auto-start OCR</label>
+    <button id="start">Start OCR</button>
+    <span class="legend">Tap boxes to toggle. Export keeps original file order.</span>
+  </div>
+
+  <div id="grid"></div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="head"><div>Export</div><div class="badge" id="selCount">0 selected</div></div>
+    <textarea id="export" placeholder="Selected text appears here..."></textarea>
+    <div style="margin-top:8px; display:flex; gap:8px">
+      <button id="copy">Copy</button>
+      <button id="clearSel">Clear selections</button>
+    </div>
+  </div>
+  <footer style="margin-top:20px; padding-top:12px; border-top:1px solid #ddd; font-size:12px; color:#444; text-align:center;">
+    <p>Powered by <a href="https://github.com/naptha/tesseract.js" target="_blank" rel="noopener">Tesseract.js</a> (Apache License 2.0)</p>
+    <p>© 2025 大溪分局三元派出所 所長黃郁翔 All rights reserved</p>
+  </footer>
+  <!-- scripts: v5 + local-only -->
+  <script src="tesseract/tesseract.min.js"></script>
+  <script src="draw.js"></script>
+  <script src="ocr.v5.js"></script>
+</body>
+</html>
