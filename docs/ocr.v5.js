@@ -39,14 +39,21 @@
 
   function renderItemCard(item){
     const card = document.createElement('div'); card.className='card'; card.dataset.id=item.id;
+
     const head = document.createElement('div'); head.className='head';
-    head.innerHTML = `<div>${item.file.name}</div><div class="badge" id="badge-${item.id}">queued</div>`;
+    const left = document.createElement('div'); left.textContent = item.file.name;
+    const right = document.createElement('div'); right.className='badge'; right.id = `badge-${item.id}`;
+    right.textContent = 'queued';
+    head.append(left, right);
     card.appendChild(head);
+
     const wrap = document.createElement('div'); wrap.className='canvas-wrap';
-    const canvas = document.createElement('canvas'); canvas.id='canvas-'+item.id;
+    const canvas = document.createElement('canvas'); canvas.id = 'canvas-'+item.id;
     wrap.appendChild(canvas); card.appendChild(wrap);
+
     const status = document.createElement('div'); status.className='legend'; status.id='status-'+item.id; status.textContent='waiting...';
     card.appendChild(status);
+
     grid.appendChild(card);
   }
 
@@ -66,6 +73,7 @@
   async function downscaleBlob(file, maxW=1600, maxH=1600){
     const imgURL = URL.createObjectURL(file);
     const img = await new Promise(r => { const i=new Image(); i.onload=()=>r(i); i.src=imgURL; });
+    URL.revokeObjectURL(imgURL);
     const scale = Math.min(1, maxW/img.naturalWidth, maxH/img.naturalHeight);
     if (scale === 1) return file;
     const c = document.createElement('canvas');
@@ -85,6 +93,10 @@
 
     // SCHEME A: use the same downscaled blob for OCR and display
     const blob = await downscaleBlob(item.file, 1600, 1600);
+    // release previous preview URL if any
+    if (item.url) {
+      try { URL.revokeObjectURL(item.url); } catch(e) {}
+    }
     const urlFromBlob = URL.createObjectURL(blob);
     item.url = urlFromBlob; // display exactly the same image as OCR uses
 
@@ -98,6 +110,12 @@
   }
 
   function reset(){
+    // revoke object URLs to avoid memory leaks and remove any retained previews
+    items.forEach(it => {
+      if (it && it.url) {
+        try { URL.revokeObjectURL(it.url); } catch(e){}
+      }
+    });
     items=[]; selections=new Map(); grid.innerHTML=''; exportEl.value=''; updateSelCount();
   }
 
